@@ -48,6 +48,24 @@ build_mac_metal() {
   echo "Build files copied to $target_path"
 }
 
+build_visionos_metal() {
+  clean_build
+  echo "Starting building for VisionOS (Metal)..."
+
+  cmake -DCMAKE_OSX_ARCHITECTURES="arm64" -DWHISPER_METAL=ON -DCMAKE_BUILD_TYPE=Release  \
+   -DWHISPER_NO_AVX=ON -DWHISPER_NO_AVX2=ON -DWHISPER_NO_FMA=ON -DWHISPER_NO_F16C=ON \
+   -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF -DWHISPER_METAL_EMBED_LIBRARY=ON ../
+  make
+
+  echo "Build for VisionOS (Metal) complete!"
+
+  artifact_path="$build_path/libwhisper.dylib"
+  target_path="$unity_project/Packages/com.whisper.unity/Plugins/VisionOS/libwhisper_metal.dylib"
+  cp "$artifact_path" "$target_path"
+
+  echo "Build files copied to $target_path"
+}
+
 build_ios() {
   clean_build
   echo "Starting building for ios..."
@@ -96,6 +114,8 @@ elif [ "$targets" = "ios" ]; then
   build_ios
 elif [ "$targets" = "android" ]; then
   build_android
+elif [ "$targets" = "visionos_metal" ]; then
+  build_visionos_metal
 else
   echo "Unknown targets: $targets"
 fi
