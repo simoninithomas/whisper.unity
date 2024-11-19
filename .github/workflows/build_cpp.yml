@@ -278,3 +278,35 @@ jobs:
           name: android
           path: ${{ github.workspace }}/whisper-cpp/build/libwhisper.a
           if-no-files-found: error
+
+  build-visionos-metal:
+    name: Build for VisionOS Metal (ARM)
+    runs-on: macOS-latest
+    steps:
+      - name: Clone whisper.unity
+        uses: actions/checkout@v3
+        with:
+          path: whisper-unity
+          
+      - name: Clone whisper.cpp
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ github.event.inputs.whisper_cpp_repo }}
+          ref: ${{ github.event.inputs.whisper_cpp_repo_ref }}
+          path: whisper-cpp
+          
+      - name: Run build script
+        run: |
+          cd whisper-unity
+          sh build_cpp.sh ../whisper-cpp/ visionos_metal
+          cd ${{ github.workspace }}/whisper-cpp/build/
+          mv libwhisper.dylib libwhisper_visionos_metal.dylib
+          
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: visionos-metal
+          path: |
+            ${{ github.workspace }}/whisper-cpp/build/libwhisper_visionos_metal.dylib
+            ${{ github.workspace }}/whisper-cpp/build/bin/ggml-metal.metal   
+          if-no-files-found: error
